@@ -9,15 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     
+    @State private var task: String = ""
+    
     var body: some View {
-        
         ZStack {
             VStack(spacing: 0) {
                 HeaderView()
                 
-                CreateView()
+                CreateView(task: $task)
                 
-                BodyView()
+                BodyView(value: task)
                 
             }
         }
@@ -42,12 +43,14 @@ struct HeaderView: View {
 }
 
 struct CreateView: View {
-    @State private var value: String = ""
+    
+    @Binding var task: String
     @FocusState private var isFocused: Bool
+    
     
     var body: some View {
         HStack(spacing: 8) {
-            TextField("", text: $value, prompt: Text("Adicione uma nova tarefa")
+            TextField("", text: $task, prompt: Text("Adicione uma nova tarefa")
                 .foregroundColor(Color(red: 128/255, green: 128/255, blue: 128/255))).padding(.leading, 10)
                 .frame(height: 54)
                 .background(Color(red: 38/255, green: 38/255, blue: 38/255))
@@ -55,6 +58,9 @@ struct CreateView: View {
                 .border(isFocused ? Color(red: 94/255, green: 96/255, blue: 206/255) : Color.clear, width: 2)
                 .cornerRadius(6)
                 .focused($isFocused)
+                .onSubmit {
+                    print(task)
+                }
             
             Button(action: {}, label: {
                 HStack {
@@ -76,6 +82,8 @@ struct CreateView: View {
 }
 
 struct BodyView: View {
+    
+    let value: String
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -130,8 +138,41 @@ struct BodyView: View {
                     .foregroundStyle(Color(red: 128/255, green: 128/255, blue: 128/255))
                 Text("Crie tarefas e organize seus itens a fazer")
                     .foregroundStyle(Color(red: 128/255, green: 128/255, blue: 128/255))
-                    
+                
+                Text(value)
+                    .foregroundStyle(Color.white)
+                
             }
         }
+    }
+}
+
+struct ToDoCard: View {
+    var body: some View {
+        
+        HStack {
+            Button(action: {}, label: {
+                Image(systemName: "circle").foregroundStyle(Color(red: 78/255, green: 168/255, blue: 222/255))
+            })
+            
+            Spacer()
+            
+            Text("Integer urna interdum massa libero auctor neque turpis turpis semper.")
+                .fontWeight(.medium)
+                .foregroundStyle(Color(red: 242/255, green: 242/255, blue: 242/255))
+
+            
+            Spacer()
+
+            Button(action: {}, label: {
+                Image(systemName: "trash").foregroundStyle(Color(red: 128/255, green: 128/255, blue: 128/255))
+            })
+            
+        }
+        .padding()
+        .frame(height: 64)
+        .background(Color(red: 38/255, green: 38/255, blue: 38/255))
+        .cornerRadius(12)
+        .padding(.horizontal, 24)
     }
 }
