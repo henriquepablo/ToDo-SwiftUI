@@ -10,15 +10,17 @@ import SwiftUI
 struct ContentView: View {
     
     @State private var task: String = ""
+    @State private var tasks: [Task] = []
+    
     
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
                 HeaderView()
                 
-                CreateView(task: $task)
+                CreateView(task: $task, tasks: $tasks)
                 
-                BodyView(value: task)
+                BodyView(tasks: $tasks)
                 
             }
         }
@@ -45,8 +47,18 @@ struct HeaderView: View {
 struct CreateView: View {
     
     @Binding var task: String
+    @Binding var tasks: [Task]
     @FocusState private var isFocused: Bool
     
+    
+    func handleAddTask() {
+        guard !task.isEmpty else { return }
+        
+        tasks.append(Task(title: task))
+        task = ""
+        
+        print(tasks)
+    }
     
     var body: some View {
         HStack(spacing: 8) {
@@ -59,10 +71,10 @@ struct CreateView: View {
                 .cornerRadius(6)
                 .focused($isFocused)
                 .onSubmit {
-                    print(task)
+                    handleAddTask()
                 }
             
-            Button(action: {}, label: {
+            Button(action: {handleAddTask()}, label: {
                 HStack {
                     Image(systemName: "plus.circle")
                 }
@@ -83,7 +95,7 @@ struct CreateView: View {
 
 struct BodyView: View {
     
-    let value: String
+    @Binding var tasks: [Task]
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -99,7 +111,7 @@ struct BodyView: View {
                         
                     ZStack {
                         Color(red: 51/255, green: 51/255, blue: 51/255)
-                        Text("0")
+                        Text("\(tasks.count)")
                             .bold()
                             .foregroundStyle(.white)
                     }
@@ -114,7 +126,7 @@ struct BodyView: View {
                         
                     ZStack {
                         Color(red: 51/255, green: 51/255, blue: 51/255)
-                        Text("0")
+                        Text("\(tasks.filter { $0.isCompleted }.count)")
                             .bold()
                             .foregroundStyle(.white)
                             
@@ -129,42 +141,74 @@ struct BodyView: View {
                     .padding(.horizontal, 24)
                     .padding(.vertical, 10)
                 
-                Image("Clipboard")
-                    .padding(.top, 48)
-                    .padding(.bottom, 16)
-                
-                Text("Você ainda não tem tarefas cadastradas")
-                    .bold()
-                    .foregroundStyle(Color(red: 128/255, green: 128/255, blue: 128/255))
-                Text("Crie tarefas e organize seus itens a fazer")
-                    .foregroundStyle(Color(red: 128/255, green: 128/255, blue: 128/255))
-                
-                Text(value)
-                    .foregroundStyle(Color.white)
-                
             }
+            
+            
+            VStack {
+                if (tasks.isEmpty) {
+                    ListEmpty()
+                } else {
+                    ScrollView {
+                        LazyVStack {
+                            ForEach($tasks) { $task in
+                                ToDoCard(task: $task, onDelete: {
+                                    tasks.removeAll { $0.id == task.id }
+                                })
+                            }
+                        }
+                    }
+                    .padding(.vertical, 60)
+                }
+            }
+            .padding(.vertical, 20)
+        }
+    }
+}
+
+struct ListEmpty: View {
+    var body: some View {
+        
+        VStack {
+            Image("Clipboard")
+                .padding(.top, 48)
+                .padding(.bottom, 16)
+            
+            Text("Você ainda não tem tarefas cadastradas")
+                .bold()
+                .foregroundStyle(Color(red: 128/255, green: 128/255, blue: 128/255))
+            Text("Crie tarefas e organize seus itens a fazer")
+                .foregroundStyle(Color(red: 128/255, green: 128/255, blue: 128/255))
         }
     }
 }
 
 struct ToDoCard: View {
+    
+    @Binding var task: Task
+    let onDelete: () -> Void
+    
+    func handleCompleteTask() {
+        task.isCompleted.toggle()
+    }
+    
     var body: some View {
         
         HStack {
-            Button(action: {}, label: {
-                Image(systemName: "circle").foregroundStyle(Color(red: 78/255, green: 168/255, blue: 222/255))
+            Button(action: {handleCompleteTask()}, label: {
+                Image(systemName: task.isCompleted ? "circle.fill" : "circle").foregroundStyle(Color(red: 78/255, green: 168/255, blue: 222/255))
             })
             
             Spacer()
             
-            Text("Integer urna interdum massa libero auctor neque turpis turpis semper.")
+            Text(task.title)
+                .strikethrough(task.isCompleted)
                 .fontWeight(.medium)
                 .foregroundStyle(Color(red: 242/255, green: 242/255, blue: 242/255))
 
             
             Spacer()
 
-            Button(action: {}, label: {
+            Button(action: {onDelete()}, label: {
                 Image(systemName: "trash").foregroundStyle(Color(red: 128/255, green: 128/255, blue: 128/255))
             })
             
@@ -175,4 +219,10 @@ struct ToDoCard: View {
         .cornerRadius(12)
         .padding(.horizontal, 24)
     }
+}
+
+struct Task: Identifiable {
+    let id = UUID()
+    let title: String
+    var isCompleted: Bool = false
 }
