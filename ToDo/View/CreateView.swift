@@ -13,15 +13,7 @@ struct CreateView: View {
     
     @FocusState private var isFocused: Bool
     
-    
-    func handleAddTask() {
-        guard !viewModel.task.isEmpty else { return }
         
-        viewModel.tasks.append(Task(title: viewModel.task))
-        viewModel.task = ""
-        
-    }
-    
     var body: some View {
         HStack(spacing: 8) {
             TextField("", text: $viewModel.task, prompt: Text("Adicione uma nova tarefa")
@@ -33,10 +25,10 @@ struct CreateView: View {
                 .cornerRadius(6)
                 .focused($isFocused)
                 .onSubmit {
-                    handleAddTask()
+                    viewModel.handleAddTask()
                 }
             
-            Button(action: {handleAddTask()}, label: {
+            Button(action: {viewModel.handleAddTask()}, label: {
                 HStack {
                     Image(systemName: "plus.circle")
                 }

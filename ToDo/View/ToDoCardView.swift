@@ -11,15 +11,13 @@ struct ToDoCardView: View {
     
     @Binding var task: Task
     let onDelete: () -> Void
+    let handleComplete: () -> Void
     
-    func handleCompleteTask() {
-        task.isCompleted.toggle()
-    }
     
     var body: some View {
         
         HStack {
-            Button(action: {handleCompleteTask()}, label: {
+            Button(action: {handleComplete()}, label: {
                 Image(systemName: task.isCompleted ? "circle.fill" : "circle").foregroundStyle(Color(red: 78/255, green: 168/255, blue: 222/255))
             })
             

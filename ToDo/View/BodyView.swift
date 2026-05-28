@@ -66,7 +66,9 @@ struct BodyView: View {
                         LazyVStack {
                             ForEach($viewModel.tasks) { $task in
                                 ToDoCardView(task: $task, onDelete: {
-                                    viewModel.tasks.removeAll { $0.id == task.id }
+                                    viewModel.handleDelete(task: task)
+                                }, handleComplete: {
+                                    viewModel.handleComplete(task: task)
                                 })
                             }
                         }
