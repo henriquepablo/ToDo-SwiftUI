@@ -16,12 +16,23 @@ class ContentViewModel: ObservableObject {
     func handleAddTask() {
         guard !task.isEmpty else { return }
         
-        tasks.append(Task(title: task))
+        tasks.append(Task(id: UUID(), title: task))
+        
+        saveOnUserDefaults(list: tasks)
+        
         task = ""
     }
     
     func handleDelete(task: Task) {
         tasks.removeAll { $0.id == task.id }
+        saveOnUserDefaults(list: tasks)
+        
+    }
+    
+    func saveOnUserDefaults(list: [Task]) {
+        if let encoded = try? JSONEncoder().encode(list) {
+            UserDefaults.standard.set(encoded, forKey: "TaskList")
+        }
     }
     
     func handleComplete(task: Task) {
@@ -33,5 +44,14 @@ class ContentViewModel: ObservableObject {
         }
 
         tasks[index].isCompleted.toggle()
+        saveOnUserDefaults(list: tasks)
+        
+    }
+    
+    func loadTasks() {
+        if let data = UserDefaults.standard.data(forKey: "TaskList"),
+           let decodedTasks = try? JSONDecoder().decode([Task].self, from: data) {
+            tasks = decodedTasks
+        }
     }
 }
